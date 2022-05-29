@@ -41,9 +41,13 @@ contract Stake_and_reward is Random
 {	address public _reward_token ;
 	uint256 public _reward_amount = 1 * 10**18 ;
 	address public _owner ;
-  address public _vault ;
+  	address public _vault ;
+	uint256 public _cumul_deposit_count = 0;
+	uint256 public _cumul_withdraw_count = 0;
+	uint256 public _cumul_claim_count = 0;
+
+	uint256 public _cumul_claim_amount = 0;
 	uint256 public _unit_reward_amount = 374 * 10**15 ; // =0.263263
-	uint256 public _cumul_claim_amount = 0 ;
 	mapping ( address => uint256 ) public _deposit_time ; // user => token id => timestamp
 	mapping ( address => uint256 ) public _withdraw_time ; //
 	mapping ( address => uint256) public _claimed_amounts ;
@@ -107,6 +111,7 @@ contract Stake_and_reward is Random
 			} else {}
 		}
 		IERC20( _reward_token ).transfer( msg.sender , claimable_amount ) ;
+		_cumul_claim_count+=1;
 		_cumul_claim_amount += claimable_amount ;
 		_claim_time [ msg.sender ]  = block.timestamp ;
 		_claimed_amounts [ msg.sender ] += claimable_amount;
@@ -129,6 +134,7 @@ contract Stake_and_reward is Random
 		else {revert("ERR() balance not enough"); }
 		IERC20 ( _erc20 ).transfer ( _to  , _amount);
 		_withdraw_time [ msg.sender ] = block.timestamp ;
+		_cumul_withdraw_count+=1;
 //		IKIP17 ( _erc721 ).transfer ( _to , _tokenid ) ;
 //		emit Withdraw ( _erc721 , _tokenid ) ;
 	}
@@ -164,6 +170,7 @@ contract Stake_and_reward is Random
     if (_vault == address(0)){}
     else { //      IKIP17 ( _erc721).safeTransferFrom ( address(this) , _vault , _tokenid , "0x00" );
 			IERC20 ( _erc20 ).transferFrom ( msg.sender , address ( this ) , _amount ) ;
+			_cumul_deposit_count+=1;
     } //		emit Deposit ( _erc721 , _tokenid );
 		_balancesums [ msg.sender ] += _amount ;
 	}
